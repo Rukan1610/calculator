@@ -107,13 +107,19 @@ function showTab(tab) {
 }
 
 function resetInputs() {
-  const d={L:210,Ffw:615,Fin:140,Cba:1.2,Cfa:0.4,Pfa:80,Pba:20,
-    M:12.2,A:40,VM:22.9,FC:24.9,GCV:3320,S:0.6,
-    O2in:3.5,CO2in:15.8,COin:39,O2out:5,CO2out:14.3,COout:50,
-    Tgi:350,Tgo:135,Tpai:40,Tpao:325,Tsai:34,Tsao:325,
-    Fsa:450,Fpa:250,Tref:30,Lrad:1.2};
+  const d={
+    L:210, Ffw:615, Fin:140,
+    Cba:1.2, Cfa:0.4, Pfa:80, Pba:20,
+    M:12.2, A:40, VM:22.9, FC:24.9, GCV:3320, S:0.6,
+    O2in:3.5, CO2in:15.8, COin:39,
+    O2out:5, CO2out:14.3, COout:50,
+    Tgi:350, Tgo:135, Tpai:40, Tpao:325,
+    Tsai:34, Tsao:325, Fsa:450, Fpa:250,
+    Tref:30, Lrad:1.2
+  };
   Object.entries(d).forEach(([id,val])=>{
-    if(document.getElementById(id))document.getElementById(id).value=val;
+    if(document.getElementById(id))
+      document.getElementById(id).value=val;
   });
 }
 
