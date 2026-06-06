@@ -175,4 +175,4 @@ function downloadPDF() {
   <tr class="hl"><td>Boiler Efficiency</td><td>η</td><td>${fmt2(r.BoilerEff)}</td><td>%</td></tr></table>
   <script>window.print();<\/script></body></html>`);
   win.document.close();
-}
+}// updated
