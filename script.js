@@ -10,7 +10,6 @@ function calculate() {
   const Cba=v('Cba'),Cfa=v('Cfa'),Pfa=v('Pfa'),Pba=v('Pba');
   const Lrad=v('Lrad');
   const Cp=30.6,CVc=8077.8,CVco=2415,Mwv=0.0166;
-
   const CO2in=v('CO2in'), CO2out=v('CO2out'), COoutp=(COout/1000000)*100;
   const FcDc=FC/(1-(1.1*A/100)-M/100), VmDf=100-FcDc;
   const Cdf=FcDc+0.9*(VmDf-14), Hdf=VmDf*((7.35/(VmDf+10))-0.013);
@@ -32,12 +31,10 @@ function calculate() {
   const Lco=COoutp*7*CVco*(Ca-100*U)/3/(CO2out+COoutp)/GCV;
   const Lma=Ma*1.88*(Tgo-Trai)*100/(GCV*4.186);
   const BoilerEff=100-(Ldg+Luc+Lmf+Lhf+Lco+Lma+Lrad);
-
   window._results={CO2in,CO2out,COoutp,Trai,Cash,U,Fta,Rsa,Rpa,
     N2out,Sa,Ea,Ma,Wd,Sh,Sw,
     Ldg,Luc,Lmf,Lhf,Lco,Lma,BoilerEff,
     inputs:collectInputs()};
-
   renderOutput(window._results);
   showTab('output');
 }
@@ -60,7 +57,7 @@ function collectInputs() {
     Fsa:'SA Flow (TPH)',Fpa:'PA Flow (TPH)',
     Tref:'Ambient Temp (°C)',Lrad:'Radiation Loss (%)'
   };
-  return ids.map(id=>({id,label:labels[id]||id,value:document.getElementById(id).value}));
+  return ids.map(id=>({id,label:labels[id]||id,value:document.getElementById(id)?document.getElementById(id).value:'N/A'}));
 }
 
 function renderOutput(r) {
@@ -69,10 +66,8 @@ function renderOutput(r) {
     <div class="kpi-card kpi-red"><div class="kpi-label">Dry Gas Loss</div><div class="kpi-value">${fmt2(r.Ldg)}<span class="kpi-unit">%</span></div><div class="kpi-sub">Dominant loss component</div></div>
     <div class="kpi-card kpi-amber"><div class="kpi-label">Moisture in Fuel Loss</div><div class="kpi-value">${fmt2(r.Lmf)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
     <div class="kpi-card kpi-blue"><div class="kpi-label">Hydrogen in Fuel Loss</div><div class="kpi-value">${fmt2(r.Lhf)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>`;
-
   const row=(name,sym,val,uom,cls='')=>`<div class="output-row ${cls}"><span class="out-name">${name}</span><span class="out-sym">${sym}</span><span class="out-val">${val}</span><span class="out-uom">${uom}</span></div>`;
   const hdr=`<div class="output-row header-row"><span>Parameter</span><span>Symbol</span><span style="text-align:right">Value</span><span style="text-align:right">UoM</span></div>`;
-
   document.getElementById('output-tables').innerHTML=`
     <div class="output-section"><div class="output-section-head"><span>Losses</span></div>${hdr}
     ${row('CO₂ at APH In','CO₂in',fmt2(r.CO2in),'%')}
@@ -107,19 +102,13 @@ function showTab(tab) {
 }
 
 function resetInputs() {
-  const d={
-    L:210, Ffw:615, Fin:140,
-    Cba:1.2, Cfa:0.4, Pfa:80, Pba:20,
-    M:12.2, A:40, VM:22.9, FC:24.9, GCV:3320, S:0.6,
-    O2in:3.5, CO2in:15.8, COin:39,
-    O2out:5, CO2out:14.3, COout:50,
-    Tgi:350, Tgo:135, Tpai:40, Tpao:325,
-    Tsai:34, Tsao:325, Fsa:450, Fpa:250,
-    Tref:30, Lrad:1.2
-  };
+  const d={L:210,Ffw:615,Fin:140,Cba:1.2,Cfa:0.4,Pfa:80,Pba:20,
+    M:12.2,A:40,VM:22.9,FC:24.9,GCV:3320,S:0.6,
+    O2in:3.5,CO2in:15.8,COin:39,O2out:5,CO2out:14.3,COout:50,
+    Tgi:350,Tgo:135,Tpai:40,Tpao:325,Tsai:34,Tsao:325,
+    Fsa:450,Fpa:250,Tref:30,Lrad:1.2};
   Object.entries(d).forEach(([id,val])=>{
-    if(document.getElementById(id))
-      document.getElementById(id).value=val;
+    if(document.getElementById(id))document.getElementById(id).value=val;
   });
 }
 
@@ -129,18 +118,17 @@ function downloadCSV() {
   let csv=`CENPEEP Boiler Efficiency Report\nGenerated:,${now}\n\nINPUTS\nParameter,Value\n`;
   r.inputs.forEach(i=>{csv+=`"${i.label}",${i.value}\n`;});
   csv+='\nOUTPUTS\nParameter,Symbol,Value,UoM\n';
-  [
-    ['CO₂ APH In','CO2in',r.CO2in,'%'],
-    ['CO₂ APH Out','CO2out',r.CO2out,'%'],
-    ['Weighted Air Temp In','Trai',r.Trai,'°C'],
-    ['Dry Gas Loss','Ldg',r.Ldg,'%'],
-    ['Unburnt Carbon Loss','Luc',r.Luc,'%'],
-    ['Moisture Fuel Loss','Lmf',r.Lmf,'%'],
-    ['Hydrogen Fuel Loss','Lhf',r.Lhf,'%'],
-    ['CO Loss','Lco',r.Lco,'%'],
-    ['Moisture Air Loss','Lma',r.Lma,'%'],
-    ['Radiation Loss','Lrad',v('Lrad'),'%'],
-    ['Boiler Efficiency','eta',r.BoilerEff,'%']
+  [['CO₂ APH In','CO2in',r.CO2in,'%'],
+   ['CO₂ APH Out','CO2out',r.CO2out,'%'],
+   ['Weighted Air Temp In','Trai',r.Trai,'°C'],
+   ['Dry Gas Loss','Ldg',r.Ldg,'%'],
+   ['Unburnt Carbon Loss','Luc',r.Luc,'%'],
+   ['Moisture Fuel Loss','Lmf',r.Lmf,'%'],
+   ['Hydrogen Fuel Loss','Lhf',r.Lhf,'%'],
+   ['CO Loss','Lco',r.Lco,'%'],
+   ['Moisture Air Loss','Lma',r.Lma,'%'],
+   ['Radiation Loss','Lrad',v('Lrad'),'%'],
+   ['Boiler Efficiency','eta',r.BoilerEff,'%']
   ].forEach(([n,s,val,u])=>{csv+=`"${n}","${s}",${val},"${u}"\n`;});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
@@ -175,4 +163,4 @@ function downloadPDF() {
   <tr class="hl"><td>Boiler Efficiency</td><td>η</td><td>${fmt2(r.BoilerEff)}</td><td>%</td></tr></table>
   <script>window.print();<\/script></body></html>`);
   win.document.close();
-}// updated
+}
