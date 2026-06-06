@@ -1,4 +1,4 @@
-const v = id => parseFloat(document.getElementById(id).value);
+const v = id => { const el = document.getElementById(id); return el ? parseFloat(el.value) : 0; };
 const fmt = (n, d=4) => isNaN(n) ? '—' : n.toFixed(d);
 const fmt2 = n => fmt(n, 2);
 
