@@ -1,20 +1,20 @@
 :root {
-  --bg: #0a0e17;
-  --panel: #0f1624;
-  --panel2: #141d2e;
-  --border: #1e2d45;
-  --accent: #00c8ff;
-  --accent2: #f0a500;
-  --red: #ff4d6d;
-  --green: #00e5a0;
-  --text: #c8d8e8;
-  --text-dim: #5a7a9a;
-  --text-bright: #eaf4ff;
-  --glow: 0 0 18px rgba(0,200,255,0.18);
+  --bg: #f4f6fb;
+  --panel: #ffffff;
+  --panel2: #eef1fa;
+  --border: #dde1ee;
+  --accent: #0066ff;
+  --accent2: #e07b00;
+  --red: #dc2626;
+  --green: #059669;
+  --text: #1a1a2e;
+  --text-dim: #6b7280;
+  --text-bright: #0f172a;
+  --glow: 0 0 18px rgba(0,102,255,0.15);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; min-height: 100vh; overflow-x: hidden; }
-body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(0,102,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,102,255,0.04) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
 .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
 header { border-bottom: 1px solid var(--border); padding: 20px 0; background: linear-gradient(180deg, rgba(0,200,255,0.05) 0%, transparent 100%); }
 .header-inner { display: flex; align-items: center; justify-content: space-between; }
