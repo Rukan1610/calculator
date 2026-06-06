@@ -63,27 +63,15 @@ function collectInputs() {
 function renderOutput(r) {
   document.getElementById('kpi-area').innerHTML=`
     <div class="kpi-card kpi-green"><div class="kpi-label">Boiler Efficiency</div><div class="kpi-value">${fmt2(r.BoilerEff)}<span class="kpi-unit">%</span></div><div class="kpi-sub">Indirect method — as-tested</div></div>
-    <div class="kpi-card kpi-red"><div class="kpi-label">Dry Gas Loss</div><div class="kpi-value">${fmt2(r.Ldg)}<span class="kpi-unit">%</span></div><div class="kpi-sub">Dominant loss component</div></div>
+    <div class="kpi-card kpi-red"><div class="kpi-label">Dry Gas Loss</div><div class="kpi-value">${fmt2(r.Ldg)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
     <div class="kpi-card kpi-amber"><div class="kpi-label">Moisture in Fuel Loss</div><div class="kpi-value">${fmt2(r.Lmf)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
     <div class="kpi-card kpi-blue"><div class="kpi-label">Hydrogen in Fuel Loss</div><div class="kpi-value">${fmt2(r.Lhf)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>`;
+
   const row=(name,sym,val,uom,cls='')=>`<div class="output-row ${cls}"><span class="out-name">${name}</span><span class="out-sym">${sym}</span><span class="out-val">${val}</span><span class="out-uom">${uom}</span></div>`;
   const hdr=`<div class="output-row header-row"><span>Parameter</span><span>Symbol</span><span style="text-align:right">Value</span><span style="text-align:right">UoM</span></div>`;
+
   document.getElementById('output-tables').innerHTML=`
     <div class="output-section"><div class="output-section-head"><span>Losses</span></div>${hdr}
-    ${row('CO₂ at APH In','CO₂in',fmt2(r.CO2in),'%')}
-    ${row('CO₂ at APH Out','CO₂out',fmt2(r.CO2out),'%')}
-    ${row('Weighted Air Temp In','Trai',fmt2(r.Trai),'°C')}
-    ${row('Carbon in Ash','Cash',fmt(r.Cash),'%')}
-    ${row('Carbon per kg fuel','U',r.U.toExponential(4),'kg/kg')}
-    ${row('Total Air Flow','Fta',fmt2(r.Fta),'TPH')}
-    ${row('Ratio SA Flow','Rsa',fmt(r.Rsa),'')}
-    ${row('Ratio PA Flow','Rpa',fmt(r.Rpa),'')}
-    ${row('Weight of Dry Gas','Wd',fmt(r.Wd),'kg/kg')}
-    ${row('Sensible Heat Dry Gas','Sh',fmt(r.Sh),'kJ/kg')}
-    ${row('Sensible Heat Water Vapor','Sw',fmt2(r.Sw),'kJ/kg')}
-    ${row('Stoichiometric Air','Sa',fmt(r.Sa),'kg/kg')}
-    ${row('Excess Air','Ea',fmt(r.Ea),'')}
-    ${row('Total Moisture in Air','Ma',fmt(r.Ma),'kg/kg')}
     ${row('Dry Gas Loss','Ldg',fmt2(r.Ldg),'%','highlight-row2')}
     ${row('Loss — Unburnt Carbon','Luc',fmt2(r.Luc),'%','highlight-row2')}
     ${row('Loss — Moisture in Fuel','Lmf',fmt2(r.Lmf),'%','highlight-row2')}
