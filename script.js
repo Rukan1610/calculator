@@ -72,7 +72,7 @@ function renderOutput(r) {
     <div class="kpi-card kpi-red" style="grid-column:span 2;">
       <div class="kpi-label">Radiation &amp; Unaccounted Loss</div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
-        <input type="number" id="Lrad" value="1.2"
+        <input type="number" id="Lrad" value="1.2" oninput="recalculate"
           style="background:var(--bg);border:1px solid var(--accent);border-radius:6px;padding:6px 10px;font-family:'DM Mono',monospace;font-size:24px;color:var(--text-bright);width:120px;outline:none;"/>
         <span style="font-size:14px;color:var(--muted);font-family:'DM Mono',monospace;">%</span>
       </div>
@@ -160,6 +160,19 @@ function autoCalcCO2() {
   const co2out = document.getElementById('CO2out');
   if(co2in) co2in.value = (19.3 - O2in).toFixed(2);
   if(co2out) co2out.value = (19.3 - O2out).toFixed(2);
+}
+
+function recalculate() {
+  if (!window._results) return;
+
+  const Lrad = v('Lrad');
+  const r = window._results;
+
+  const BoilerEff = 100 - (r.Ldg + r.Luc + r.Lmf + r.Lhf + r.Lco + r.Lma + Lrad);
+
+  window._results.BoilerEff = BoilerEff;
+
+  renderOutput(window._results);
 }
 
 document.getElementById('O2in').addEventListener('input', autoCalcCO2);
