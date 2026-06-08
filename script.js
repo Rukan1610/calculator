@@ -64,22 +64,22 @@ function renderOutput(r) {
   document.getElementById('kpi-area').innerHTML=`
     <div class="kpi-card kpi-green"><div class="kpi-label">Boiler Efficiency</div><div class="kpi-value">${fmt2(r.BoilerEff)}<span class="kpi-unit">%</span></div><div class="kpi-sub">Indirect method — as-tested</div></div>
     <div class="kpi-card kpi-red"><div class="kpi-label">Dry Gas Loss</div><div class="kpi-value">${fmt2(r.Ldg)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
-    <div class="kpi-card kpi-amber"><div class="kpi-label">Moisture in Fuel Loss</div><div class="kpi-value">${fmt2(r.Lmf)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
-    <div class="kpi-card kpi-blue"><div class="kpi-label">Hydrogen in Fuel Loss</div><div class="kpi-value">${fmt2(r.Lhf)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>`;
+    <div class="kpi-card kpi-amber"><div class="kpi-label">Loss — Unburnt Carbon</div><div class="kpi-value">${fmt2(r.Luc)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
+    <div class="kpi-card kpi-blue"><div class="kpi-label">Loss — Moisture in Fuel</div><div class="kpi-value">${fmt2(r.Lmf)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
+    <div class="kpi-card kpi-green"><div class="kpi-label">Loss — Hydrogen in Fuel</div><div class="kpi-value">${fmt2(r.Lhf)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
+    <div class="kpi-card kpi-amber"><div class="kpi-label">Loss — Carbon Monoxide</div><div class="kpi-value">${fmt(r.Lco)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
+    <div class="kpi-card kpi-blue"><div class="kpi-label">Loss — Moisture in Air</div><div class="kpi-value">${fmt2(r.Lma)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
+    <div class="kpi-card kpi-red" style="grid-column:span 2;">
+      <div class="kpi-label">Radiation &amp; Unaccounted Loss</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <input type="number" id="Lrad" value="1.2"
+          style="background:var(--bg);border:1px solid var(--accent);border-radius:6px;padding:6px 10px;font-family:'DM Mono',monospace;font-size:24px;color:var(--text-bright);width:120px;outline:none;"/>
+        <span style="font-size:14px;color:var(--muted);font-family:'DM Mono',monospace;">%</span>
+      </div>
+      <div class="kpi-sub">Enter value and recalculate</div>
+    </div>`;
 
-  const row=(name,sym,val,uom,cls='')=>`<div class="output-row ${cls}"><span class="out-name">${name}</span><span class="out-sym">${sym}</span><span class="out-val">${val}</span><span class="out-uom">${uom}</span></div>`;
-  const hdr=`<div class="output-row header-row"><span>Parameter</span><span>Symbol</span><span style="text-align:right">Value</span><span style="text-align:right">UoM</span></div>`;
-
-  document.getElementById('output-tables').innerHTML=`
-    <div class="output-section"><div class="output-section-head"><span>Losses</span></div>${hdr}
-    ${row('Dry Gas Loss','Ldg',fmt2(r.Ldg),'%','highlight-row2')}
-    ${row('Loss — Unburnt Carbon','Luc',fmt2(r.Luc),'%','highlight-row2')}
-    ${row('Loss — Moisture in Fuel','Lmf',fmt2(r.Lmf),'%','highlight-row2')}
-    ${row('Loss — Hydrogen in Fuel','Lhf',fmt2(r.Lhf),'%','highlight-row2')}
-    ${row('Loss — Carbon Monoxide','Lco',fmt(r.Lco),'%','highlight-row2')}
-    ${row('Loss — Moisture in Air','Lma',fmt2(r.Lma),'%','highlight-row2')}
-    ${row('Radiation & Unaccounted','Lrad',v('Lrad').toFixed(2),'%','highlight-row2')}
-    ${row('Boiler Efficiency','η',fmt2(r.BoilerEff),'%','highlight-row')}</div>`;
+  document.getElementById('output-tables').innerHTML='';
 }
 
 function showTab(tab) {
