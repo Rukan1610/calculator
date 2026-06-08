@@ -85,3 +85,22 @@ header { border-bottom: 1px solid var(--border); padding: 20px 0; background: li
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); }
+.field-formula {
+  border-color: rgba(0,102,255,0.4) !important;
+  background: rgba(0,102,255,0.03);
+}
+.formula-input {
+  background: rgba(0,102,255,0.06) !important;
+  color: var(--accent) !important;
+  cursor: not-allowed;
+}
+.formula-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  background: var(--accent);
+  color: white;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
