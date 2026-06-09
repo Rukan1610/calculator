@@ -62,7 +62,7 @@ function collectInputs() {
 
 function renderOutput(r) {
   document.getElementById('kpi-area').innerHTML=`
-    <div class="kpi-card kpi-green"><div class="kpi-label">Boiler Efficiency</div><div class="kpi-value">${fmt2(r.BoilerEff)}<span class="kpi-unit">%</span></div><div class="kpi-sub">Indirect method — as-tested</div></div>
+    <div class="kpi-card kpi-green"><div class="kpi-label">Boiler Efficiency</div><div class="kpi-value boiler-eff-val">${fmt2(r.BoilerEff)}<span class="kpi-unit">%</span></div><div class="kpi-sub">Indirect method — as-tested</div></div>
     <div class="kpi-card kpi-red"><div class="kpi-label">Dry Gas Loss</div><div class="kpi-value">${fmt2(r.Ldg)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
     <div class="kpi-card kpi-amber"><div class="kpi-label">Loss — Unburnt Carbon</div><div class="kpi-value">${fmt2(r.Luc)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
     <div class="kpi-card kpi-blue"><div class="kpi-label">Loss — Moisture in Fuel</div><div class="kpi-value">${fmt2(r.Lmf)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
@@ -164,15 +164,15 @@ function autoCalcCO2() {
 
 function recalculate() {
   if (!window._results) return;
-
-  const Lrad = v('Lrad');
+  const Lrad = parseFloat(document.getElementById('Lrad').value) || 0;
   const r = window._results;
-
   const BoilerEff = 100 - (r.Ldg + r.Luc + r.Lmf + r.Lhf + r.Lco + r.Lma + Lrad);
-
   window._results.BoilerEff = BoilerEff;
 
-  renderOutput(window._results);
+  // Update only the boiler efficiency values without re-rendering everything
+  document.querySelectorAll('.boiler-eff-val').forEach(el => {
+    el.textContent = fmt2(BoilerEff);
+  });
 }
 document.getElementById('O2in').addEventListener('input', autoCalcCO2);
 document.getElementById('O2out').addEventListener('input', autoCalcCO2);
