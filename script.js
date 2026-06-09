@@ -72,7 +72,7 @@ function renderOutput(r) {
     <div class="kpi-card kpi-red" style="grid-column:span 2;">
       <div class="kpi-label">Radiation &amp; Unaccounted Loss</div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
-        <input type="number" id="Lrad" value="1.2" oninput="recalculate"
+        <input type="number" id="Lrad" value="1.2" oninput="recalculate()"
           style="background:var(--bg);border:1px solid var(--accent);border-radius:6px;padding:6px 10px;font-family:'DM Mono',monospace;font-size:24px;color:var(--text-bright);width:120px;outline:none;"/>
         <span style="font-size:14px;color:var(--muted);font-family:'DM Mono',monospace;">%</span>
       </div>
@@ -174,7 +174,6 @@ function recalculate() {
 
   renderOutput(window._results);
 }
-
 document.getElementById('O2in').addEventListener('input', autoCalcCO2);
 document.getElementById('O2out').addEventListener('input', autoCalcCO2);
 
