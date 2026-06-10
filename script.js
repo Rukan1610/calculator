@@ -11,19 +11,31 @@ function calculate() {
   const Lrad=v('Lrad');
   const Cp=30.6,CVc=8077.8,CVco=2415,Mwv=0.0166;
   const CO2in=v('CO2in'), CO2out=v('CO2out'), COoutp=(COout/1000000)*100;
+
+  // Ultimate analysis
   const FcDc=FC/(1-(1.1*A/100)-M/100), VmDf=100-FcDc;
   const Cdf=FcDc+0.9*(VmDf-14), Hdf=VmDf*((7.35/(VmDf+10))-0.013);
   const Ndf=2.1-(0.012*VmDf), k=(VM+FC)/(VmDf+FcDc);
   const Ca=Cdf*k, H=Hdf*k, N=Ndf*k, O=100-Ca-S-H-M-N-A;
+
+  // Air flow
   const Fta=Fsa+Fpa, Rsa=Fsa/Fta, Rpa=Fpa/Fta;
   const Trai=Tsai*Rsa+Tpai*Rpa;
+
+  // Ash & carbon
   const Cash=Pfa/100*Cfa+Pba/100*Cba, U=A/100*Cash/(100-Cash);
   const N2out=100-(O2out+CO2out+COoutp);
+
+  // Air calculations
   const Sa=(2.66*(Ca-U*100)+7.937*H+0.996*S-O)/23.2;
   const Ea=1+(O2out-COoutp/2)/(0.2682*N2out-(O2out-COoutp));
   const Ma=Sa*Ea*Mwv;
+
+  // Heat calculations
   const Wd=(Ca+S/2.67-100*U)/(12*CO2out);
   const Sh=Wd*Cp*(Tgo-Trai), Sw=1.88*(Tgo-25)+2442+4.2*(25-Trai);
+
+  // Test losses
   const Ldg=Sh*100/(GCV*4.186);
   const Luc=U*CVc*100/GCV;
   const Lmf=Sw*M/(GCV*4.186);
@@ -31,10 +43,46 @@ function calculate() {
   const Lco=COoutp*7*CVco*(Ca-100*U)/3/(CO2out+COoutp)/GCV;
   const Lma=Ma*1.88*(Tgo-Trai)*100/(GCV*4.186);
   const BoilerEff=100-(Ldg+Luc+Lmf+Lhf+Lco+Lma+Lrad);
-  window._results={CO2in,CO2out,COoutp,Trai,Cash,U,Fta,Rsa,Rpa,
+
+  // Design conditions
+  const Cd=v('Cd'),Sd=v('Sd'),Hd=v('Hd'),Od=v('Od');
+  const Ad2=v('Ad2'),GCVd=v('GCVd'),Trad=v('Trad'),Mwvd=v('Mwvd');
+  const Md=v('Md2');
+
+  // Corrected gas temp
+  const AL=(CO2in-CO2out)*0.9*100/CO2out;
+  const Tgnl=((AL*Cp*(Tgo-Trai))/(100*Cp))+Tgo;
+  const Tgc=(Trad*(Tgi-Tgo)+Tgi*(Tgo-Trai))/(Tgi-Trai);
+
+  // Corrected losses
+  const Wdc=(Cd+Sd/2.67-100*U)/(12*CO2out);
+  const Shc=Wdc*Cp*(Tgc-Trad);
+  const Ldgc=Shc*100/(GCVd*4.186);
+
+  const Kc=Math.exp(0.225*Cd/Hd)-Math.exp(0.225*Ca/H);
+  const V_corr=(v('VMd')<17)?0.013*(Ad2*GCV/(A*GCVd))*Kc:0;
+  const Lucc=Luc*((Ad2*GCV)/(A*GCVd))+V_corr;
+
+  const Swd=1.88*(Tgc-25)+2442+4.2*(25-Trad);
+  const Lmfc=Swd*Md/(GCVd*4.186);
+  const Lhfc=9*Hd*Swd/(GCVd*4.186);
+  const Lcoc=COoutp*7*CVco*(Cd-100*U)/3/(CO2out+COoutp)/GCVd;
+
+  const Sad=(2.66*(Cd-U*100)+7.937*Hd+0.996*Sd-Od)/23.2;
+  const Ead=1+(O2out-COoutp/2)/(0.2682*N2out-(O2out-COoutp));
+  const Mad=Sad*Ead*Mwvd;
+  const Lmac=Mad*1.88*(Tgc-Trad)*100/(GCVd*4.186);
+
+  const BoilerEffCorr=100-(Ldgc+Lucc+Lmfc+Lhfc+Lcoc+Lmac+Lrad);
+
+  window._results={
+    CO2in,CO2out,COoutp,Trai,Cash,U,Fta,Rsa,Rpa,
     N2out,Sa,Ea,Ma,Wd,Sh,Sw,
     Ldg,Luc,Lmf,Lhf,Lco,Lma,BoilerEff,
-    inputs:collectInputs()};
+    AL,Tgnl,Tgc,Ldgc,Lucc,Lmfc,Lhfc,Lcoc,Lmac,BoilerEffCorr,
+    inputs:collectInputs()
+  };
+
   renderOutput(window._results);
   showTab('output');
 }
@@ -63,6 +111,7 @@ function collectInputs() {
 function renderOutput(r) {
   document.getElementById('kpi-area').innerHTML=`
     <div class="kpi-card kpi-green"><div class="kpi-label">Boiler Efficiency</div><div class="kpi-value boiler-eff-val">${fmt2(r.BoilerEff)}<span class="kpi-unit">%</span></div><div class="kpi-sub">Indirect method — as-tested</div></div>
+    <div class="kpi-card kpi-blue"><div class="kpi-label">Boiler Efficiency Corrected</div><div class="kpi-value boiler-eff-corr-val">${fmt2(r.BoilerEffCorr)}<span class="kpi-unit">%</span></div><div class="kpi-sub">Corrected to design conditions</div></div>
     <div class="kpi-card kpi-red"><div class="kpi-label">Dry Gas Loss</div><div class="kpi-value">${fmt2(r.Ldg)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
     <div class="kpi-card kpi-amber"><div class="kpi-label">Loss — Unburnt Carbon</div><div class="kpi-value">${fmt2(r.Luc)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
     <div class="kpi-card kpi-blue"><div class="kpi-label">Loss — Moisture in Fuel</div><div class="kpi-value">${fmt2(r.Lmf)}<span class="kpi-unit">%</span></div><div class="kpi-sub"></div></div>
@@ -78,6 +127,7 @@ function renderOutput(r) {
       </div>
       <div class="kpi-sub">Enter value and recalculate</div>
     </div>`;
+    
 
   document.getElementById('output-tables').innerHTML='';
 }
@@ -94,7 +144,9 @@ function resetInputs() {
     M:12.2,A:40,VM:22.9,FC:24.9,GCV:3320,S:0.6,
     O2in:3.5,COin:39,O2out:5,COout:50,
     Tgi:350,Tgo:135,Tpai:40,Tpao:325,Tsai:34,Tsao:325,
-    Fsa:450,Fpa:250,Tref:30,Lrad:1.2};
+    Fsa:450,Fpa:250,Tref:30,Lrad:1.2,Md:13, Ad:40, VMd:24, FCd:23,
+    Cd:37, Sd:0.3, Hd:2.3, Md2:12, Nd:0.8, Od:7.6, Ad2:40,
+    GCVd:3300, Trad:38, Mwvd:0.013};
   Object.entries(d).forEach(([id,val])=>{
     if(document.getElementById(id))document.getElementById(id).value=val;
   });
