@@ -3,88 +3,181 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CENPEEP Boiler Efficiency Calculator</title>
+<title>CENPEEP — Login</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(37,99,235,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(8,145,178,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.login-box {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  position: relative;
+  z-index: 1;
+}
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.login-logo-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #2563eb, #0891b2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+}
+.login-logo-text h1 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+}
+.login-logo-text p {
+  font-size: 11px;
+  color: #64748b;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.login-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+.login-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 28px;
+}
+.form-group {
+  margin-bottom: 18px;
+}
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.form-group input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  color: #0f172a;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.2s;
+}
+.form-group input:focus {
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
+}
+.error-msg {
+  display: none;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+.error-msg.show { display: block; }
+.btn-login {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+  margin-top: 8px;
+}
+.btn-login:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37,99,235,0.4);
+}
+.btn-login:active { transform: scale(0.98); }
+</style>
 </head>
 <body>
-<header>
-  <div class="container header-inner">
-    <div class="logo">
-      <div class="logo-icon">BLR</div>
-      <div class="logo-text">
-        <h1>CENPEEP</h1>
-        <p>Boiler Efficiency Calculator</p>
-      </div>
+<div class="login-box">
+  <div class="login-logo">
+    <div class="login-logo-icon">BLR</div>
+    <div class="login-logo-text">
+      <h1>CENPEEP</h1>
+      <p>Boiler Efficiency Calculator</p>
     </div>
   </div>
-</header>
-<div class="container">
-  <div class="tab-nav">
-    <button class="tab-btn active" onclick="showTab('input')"><span class="tab-num">01 /</span> Input Parameters</button>
-    <button class="tab-btn" onclick="showTab('output')"><span class="tab-num">02 /</span> Results &amp; Losses</button>
+  <div class="login-title">Welcome back</div>
+  <div class="login-sub">Sign in to your account to continue</div>
+  <div class="error-msg" id="errorMsg">Incorrect username or password!</div>
+  <div class="form-group">
+    <label>Username</label>
+    <input type="text" id="username" placeholder="Enter username" />
   </div>
-
-  <!-- INPUT PAGE -->
-  <div class="page active" id="page-input">
-    <div class="section-header"><div class="section-label">General Data</div><div class="section-line"></div></div>
-    <div class="input-grid">
-      <div class="field"><div class="field-top"><span class="field-name">Unit Load</span><span class="field-sym">L</span></div><div class="field-bottom"><input class="field-input" id="L" type="number" value="210"><span class="field-uom">MW</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Steam Flow</span><span class="field-sym">Ffw</span></div><div class="field-bottom"><input class="field-input" id="Ffw" type="number" value="615"><span class="field-uom">T/hr</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Total Coal Flow</span><span class="field-sym">Fin</span></div><div class="field-bottom"><input class="field-input" id="Fin" type="number" value="140"><span class="field-uom">T/hr</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Unburnt Carbon in Bottom Ash</span><span class="field-sym">Cba</span></div><div class="field-bottom"><input class="field-input" id="Cba" type="number" value="1.2"><span class="field-uom">%</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Unburnt Carbon in Fly Ash</span><span class="field-sym">Cfa</span></div><div class="field-bottom"><input class="field-input" id="Cfa" type="number" value="0.4"><span class="field-uom">%</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">% of Fly Ash in Total Ash</span><span class="field-sym">Pfa</span></div><div class="field-bottom"><input class="field-input" id="Pfa" type="number" value="80"><span class="field-uom">%</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">% of Bottom Ash in Total Ash</span><span class="field-sym">Pba</span></div><div class="field-bottom"><input class="field-input" id="Pba" type="number" value="20"><span class="field-uom">%</span></div></div>
-    </div>
-
-    <div class="section-header"><div class="section-label">Proximate Analysis — As Fired</div><div class="section-line"></div></div>
-    <div class="input-grid">
-      <div class="field"><div class="field-top"><span class="field-name">Moisture</span><span class="field-sym">M</span></div><div class="field-bottom"><input class="field-input" id="M" type="number" value="12.2"><span class="field-uom">%</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Ash</span><span class="field-sym">A</span></div><div class="field-bottom"><input class="field-input" id="A" type="number" value="40"><span class="field-uom">%</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Volatile Matter</span><span class="field-sym">VM</span></div><div class="field-bottom"><input class="field-input" id="VM" type="number" value="22.9"><span class="field-uom">%</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Fixed Carbon</span><span class="field-sym">FC</span></div><div class="field-bottom"><input class="field-input" id="FC" type="number" value="24.9"><span class="field-uom">%</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Gross Calorific Value (GCV)</span><span class="field-sym">GCV</span></div><div class="field-bottom"><input class="field-input" id="GCV" type="number" value="3320"><span class="field-uom">kcal/kg</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Sulfur</span><span class="field-sym">S</span></div><div class="field-bottom"><input class="field-input" id="S" type="number" value="0.6"><span class="field-uom">%</span></div></div>
-    </div>
-
-    <div class="section-header"><div class="section-label">Plant Parameters — APH</div><div class="section-line"></div></div>
-    <div class="input-grid">
-      <div class="field"><div class="field-top"><span class="field-name">Avg. Flue Gas O₂ — APH In</span><span class="field-sym">O2in</span></div><div class="field-bottom"><input class="field-input" id="O2in" type="number" value="3.5"><span class="field-uom">%</span></div></div>
-      <div class="field field-formula"><div class="field-top"><span class="field-name">Avg. Flue Gas CO₂ — APH In <span class="formula-tag">AUTO</span></span><span class="field-sym">CO2in</span></div><div class="field-bottom"><input class="field-input formula-input" id="CO2in" type="number" readonly><span class="field-uom">%</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Avg. Flue Gas CO — APH In</span><span class="field-sym">COin</span></div><div class="field-bottom"><input class="field-input" id="COin" type="number" value="39"><span class="field-uom">ppm</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Avg. Flue Gas O₂ — APH Out</span><span class="field-sym">O2out</span></div><div class="field-bottom"><input class="field-input" id="O2out" type="number" value="5"><span class="field-uom">%</span></div></div>
-      <div class="field field-formula"><div class="field-top"><span class="field-name">Avg. Flue Gas CO₂ — APH Out <span class="formula-tag">AUTO</span></span><span class="field-sym">CO2out</span></div><div class="field-bottom"><input class="field-input formula-input" id="CO2out" type="number" readonly><span class="field-uom">%</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Avg. Flue Gas CO — APH Out</span><span class="field-sym">COout</span></div><div class="field-bottom"><input class="field-input" id="COout" type="number" value="50"><span class="field-uom">ppm</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Avg. Flue Gas Temp — APH In</span><span class="field-sym">Tgi</span></div><div class="field-bottom"><input class="field-input" id="Tgi" type="number" value="350"><span class="field-uom">°C</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Avg. Flue Gas Temp — APH Out</span><span class="field-sym">Tgo</span></div><div class="field-bottom"><input class="field-input" id="Tgo" type="number" value="135"><span class="field-uom">°C</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Primary Air to APH Temp In</span><span class="field-sym">Tpai</span></div><div class="field-bottom"><input class="field-input" id="Tpai" type="number" value="40"><span class="field-uom">°C</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Primary Air from APH Temp Out</span><span class="field-sym">Tpao</span></div><div class="field-bottom"><input class="field-input" id="Tpao" type="number" value="325"><span class="field-uom">°C</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Secondary Air to APH Temp In</span><span class="field-sym">Tsai</span></div><div class="field-bottom"><input class="field-input" id="Tsai" type="number" value="34"><span class="field-uom">°C</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Secondary Air from APH Temp Out</span><span class="field-sym">Tsao</span></div><div class="field-bottom"><input class="field-input" id="Tsao" type="number" value="325"><span class="field-uom">°C</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Total Secondary Air Flow</span><span class="field-sym">Fsa</span></div><div class="field-bottom"><input class="field-input" id="Fsa" type="number" value="450"><span class="field-uom">TPH</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Total Primary Air Flow</span><span class="field-sym">Fpa</span></div><div class="field-bottom"><input class="field-input" id="Fpa" type="number" value="250"><span class="field-uom">TPH</span></div></div>
-      <div class="field"><div class="field-top"><span class="field-name">Design Ambient / Ref Air Temp</span><span class="field-sym">Tref</span></div><div class="field-bottom"><input class="field-input" id="Tref" type="number" value="30"><span class="field-uom">°C</span></div></div>
-    </div>
-
-
-    <div class="action-bar">
-      <button class="btn btn-primary" onclick="calculate()">▶ Calculate Efficiency</button>
-      <button class="btn btn-ghost" onclick="resetInputs()">↺ Reset to Defaults</button>
-    </div>
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Enter password" />
   </div>
-
-  <!-- OUTPUT PAGE -->
-  <div class="page" id="page-output">
-    <div class="output-summary" id="kpi-area"></div>
-    <div id="output-tables"></div>
-    <div class="download-bar">
-      <button class="btn btn-primary" onclick="downloadCSV()">⬇ Download CSV Report</button>
-      <button class="btn btn-secondary" onclick="downloadPDF()">⬇ Download PDF Report</button>
-      <button class="btn btn-ghost" onclick="showTab('input')">← Back to Inputs</button>
-    </div>
-  </div>
+  <button class="btn-login" onclick="login()">Sign In</button>
 </div>
-<script src="script.js"></script>
+<script>
+function login() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  if (username === 'admin' && password === 'admin123') {
+    sessionStorage.setItem('loggedIn', 'true');
+    window.location.href = 'calculator.html';
+  } else {
+    document.getElementById('errorMsg').classList.add('show');
+  }
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+</script>
 </body>
 </html>
