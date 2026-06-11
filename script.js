@@ -218,12 +218,18 @@ function recalculate() {
   if (!window._results) return;
   const Lrad = parseFloat(document.getElementById('Lrad').value) || 0;
   const r = window._results;
+  
   const BoilerEff = 100 - (r.Ldg + r.Luc + r.Lmf + r.Lhf + r.Lco + r.Lma + Lrad);
+  const BoilerEffCorr = 100 - (r.Ldgc + r.Lucc + r.Lmfc + r.Lhfc + r.Lcoc + r.Lmac + Lrad);
+  
   window._results.BoilerEff = BoilerEff;
+  window._results.BoilerEffCorr = BoilerEffCorr;
 
-  // Update only the boiler efficiency values without re-rendering everything
   document.querySelectorAll('.boiler-eff-val').forEach(el => {
     el.textContent = fmt2(BoilerEff);
+  });
+  document.querySelectorAll('.boiler-eff-corr-val').forEach(el => {
+    el.textContent = fmt2(BoilerEffCorr);
   });
 }
 document.getElementById('O2in').addEventListener('input', autoCalcCO2);
