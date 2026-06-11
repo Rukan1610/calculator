@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CENPEEP — Sessions</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">BLR</div>
+      <span class="nav-logo-text">CENPEEP</span>
+      <!-- <span class="db-pill checking" id="db-pill">DB…</span> -->
+    </div>
+    <div class="nav-links">
+      <a href="calculator.html" class="nav-link">Calculation</a>
+      <a href="sessions.html"   class="nav-link active">Sessions</a>
+    </div>
+    <button class="nav-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<!-- ── Session detail modal ──────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Session Detail</h3>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="sessions-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <h2>Saved Sessions</h2>
+      <span class="sessions-count" id="sessions-count">—</span>
+    </div>
+    <button class="btn btn-ghost" onclick="loadSessions()" style="font-size:12px;padding:8px 16px;">
+      ↻ Refresh
+    </button>
+  </div>
+
+  <div id="sessions-content">
+    <div class="empty-state">
+      <div class="empty-icon">⏳</div>
+      <div class="empty-title">Loading sessions…</div>
+      <div class="empty-sub">Fetching data from the database.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+if (!sessionStorage.getItem('loggedIn')) {
+  window.location.href = 'index.html';
+}
+function logout() {
+  sessionStorage.removeItem('loggedIn');
+  window.location.href = 'index.html';
+}
+
+// ── DB health pill ─────────────────────────────────────────────────────
+async function checkDB() {
+  const pill = document.getElementById('db-pill');
+  try {
+    const res  = await fetch('/api/health');
+    const data = await res.json();
+    if (data.db === 'connected') {
+      pill.textContent = 'DB Online';
+      pill.className   = 'db-pill online';
+    } else {
+      pill.textContent = 'DB Offline';
+      pill.className   = 'db-pill offline';
+    }
+  } catch {
+    pill.textContent = 'DB Offline';
+    pill.className   = 'db-pill offline';
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────
+const fmt2 = n => (typeof n === 'number' && !isNaN(n)) ? n.toFixed(2) : '—';
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
+    + '  ' + d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+}
+
+// ── Load + render sessions ─────────────────────────────────────────────
+async function loadSessions() {
+  const el = document.getElementById('sessions-content');
+  el.innerHTML = `<div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-title">Loading…</div></div>`;
+  try {
+    const res  = await fetch('/api/sessions');
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+
+    const sessions = data.sessions;
+    document.getElementById('sessions-count').textContent =
+      sessions.length === 1 ? '1 session' : `${sessions.length} sessions`;
+
+    if (!sessions.length) {
+      el.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">No sessions yet</div>
+          <div class="empty-sub">Run a calculation and click "Save to Database" to store a session here.</div>
+        </div>`;
+      return;
+    }
+
+    el.innerHTML = `<div class="session-grid" id="session-grid"></div>`;
+    const grid = document.getElementById('session-grid');
+    sessions.forEach(s => grid.appendChild(buildCard(s)));
+  } catch (err) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-title">Could not load sessions</div>
+        <div class="empty-sub">${err.message}<br><br>
+          Make sure the server is running and MongoDB URI is configured in <code>.env</code>.</div>
+      </div>`;
+  }
+}
+
+function buildCard(s) {
+  const r   = s.results || {};
+  const div = document.createElement('div');
+  div.className = 'session-card';
+  div.onclick   = () => openModal(s);
+
+  const title = s.sessionName
+    || (s.sourceFile && s.sourceFile !== 'Manual Entry' ? s.sourceFile : null)
+    || `Session ${s._id.slice(-6)}`;
+
+  div.innerHTML = `
+    <button class="session-card-delete" onclick="deleteSession(event,'${s._id}')">🗑</button>
+    <div class="session-card-header">
+      <div>
+        <div class="session-card-title">${escHtml(title)}</div>
+        <div class="session-card-date">${formatDate(s.uploadedAt || s.createdAt)}</div>
+      </div>
+      <div class="session-card-source" title="${escHtml(s.sourceFile||'')}">
+        ${escHtml(s.sourceFile || 'Manual')}
+      </div>
+    </div>
+    <div class="session-kpis">
+      <div class="session-kpi">
+        <div class="session-kpi-label">Boiler Eff.</div>
+        <div class="session-kpi-value green">${fmt2(r.BoilerEff)}<span style="font-size:12px;font-weight:400;color:var(--muted2)"> %</span></div>
+      </div>
+      <div class="session-kpi">
+        <div class="session-kpi-label">Corr. Eff.</div>
+        <div class="session-kpi-value blue">${fmt2(r.BoilerEffCorr)}<span style="font-size:12px;font-weight:400;color:var(--muted2)"> %</span></div>
+      </div>
+      <div class="session-kpi">
+        <div class="session-kpi-label">Dry Gas Loss</div>
+        <div class="session-kpi-value red">${fmt2(r.Ldg)}<span style="font-size:12px;font-weight:400;color:var(--muted2)"> %</span></div>
+      </div>
+      <div class="session-kpi">
+        <div class="session-kpi-label">Unburnt C Loss</div>
+        <div class="session-kpi-value amber">${fmt2(r.Luc)}<span style="font-size:12px;font-weight:400;color:var(--muted2)"> %</span></div>
+      </div>
+    </div>`;
+  return div;
+}
+
+function escHtml(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Delete ─────────────────────────────────────────────────────────────
+async function deleteSession(e, id) {
+  e.stopPropagation();
+  if (!confirm('Delete this session?')) return;
+  try {
+    await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
+    loadSessions();
+  } catch {}
+}
+
+// ── Modal ──────────────────────────────────────────────────────────────
+function openModal(s) {
+  const r = s.results || {};
+  document.getElementById('modal-title').textContent =
+    s.sessionName || s.sourceFile || `Session ${s._id.slice(-6)}`;
+
+  const eff = (label, val, cls) => `
+    <div class="modal-row ${cls}">
+      <span class="modal-row-name">${label}</span>
+      <span class="modal-row-val">${fmt2(val)}</span>
+      <span class="modal-row-uom">%</span>
+    </div>`;
+
+  const row = (label, val, uom='') => `
+    <div class="modal-row">
+      <span class="modal-row-name">${label}</span>
+      <span class="modal-row-val">${fmt2(val)}</span>
+      <span class="modal-row-uom">${uom}</span>
+    </div>`;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:18px;">
+      Source: ${escHtml(s.sourceFile||'Manual')} &nbsp;|&nbsp; Saved: ${formatDate(s.uploadedAt||s.createdAt)}
+    </div>
+
+    <div class="modal-section-title">Efficiency Results</div>
+    ${eff('Boiler Efficiency (as-tested)',   r.BoilerEff,     'modal-highlight')}
+    ${eff('Boiler Efficiency (corrected)',   r.BoilerEffCorr, 'modal-highlight2')}
+
+    <div class="modal-section-title">Losses</div>
+    ${row('Dry Gas Loss',          r.Ldg,  '%')}
+    ${row('Unburnt Carbon Loss',   r.Luc,  '%')}
+    ${row('Moisture in Fuel Loss', r.Lmf,  '%')}
+    ${row('Hydrogen in Fuel Loss', r.Lhf,  '%')}
+    ${row('CO Loss',               r.Lco,  '%')}
+    ${row('Moisture in Air Loss',  r.Lma,  '%')}
+    ${row('Radiation Loss',        r.Lrad, '%')}
+
+    <div class="modal-section-title">Corrected Losses</div>
+    ${row('Dry Gas Loss (corr.)',         r.Ldgc, '%')}
+    ${row('Unburnt Carbon Loss (corr.)',  r.Lucc, '%')}
+    ${row('Moisture Fuel Loss (corr.)',   r.Lmfc, '%')}
+    ${row('Hydrogen Fuel Loss (corr.)',   r.Lhfc, '%')}
+    ${row('CO Loss (corr.)',              r.Lcoc, '%')}
+    ${row('Moisture Air Loss (corr.)',    r.Lmac, '%')}
+
+    <div class="modal-section-title">Intermediate Values</div>
+    ${row('CO₂ APH In',            r.CO2in,  '%')}
+    ${row('CO₂ APH Out',           r.CO2out, '%')}
+    ${row('Weighted Air Temp In',  r.Trai,   '°C')}
+    ${row('AH Leakage',            r.AL,     '%')}
+    ${row('Gas Temp (Corrected)',  r.Tgc,   '°C')}
+
+    ${(s.inputs && s.inputs.length) ? `
+    <div class="modal-section-title">Input Parameters</div>
+    ${s.inputs.map(i => row(i.label||i.id, parseFloat(i.value), '')).join('')}` : ''}
+  `;
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+
+// ── Init ───────────────────────────────────────────────────────────────
+checkDB();
+loadSessions();
+</script>
+</body>
+</html>
