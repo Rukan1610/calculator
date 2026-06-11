@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/api/upload', require('./routes/upload'));
 
 app.use('/api/sessions', require('./routes/sessions'));
-// app.use('/api/upload', require('./routes/upload'));
+app.use('/api/upload', require('./routes/upload'));
 
 app.get('/', (req, res) => {
   res.send('Vercel is working');
