@@ -15,9 +15,15 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // API routes
-app.use('/api/sessions', require('./routes/sessions'));
-app.use('/api/upload', require('./routes/upload'));
+// app.use('/api/sessions', require('./routes/sessions'));
+// app.use('/api/upload', require('./routes/upload'));
 
+// app.use('/api/sessions', require('./routes/sessions'));
+// app.use('/api/upload', require('./routes/upload'));
+
+app.get('/', (req, res) => {
+  res.send('Vercel is working');
+});
 // Health check
 app.get('/api/health', (req, res) => {
   const dbState = [
