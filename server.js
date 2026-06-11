@@ -41,17 +41,26 @@ if (!URI || URI.includes('<username>')) {
     console.log(`🚀  CENPEEP running at http://localhost:${PORT}  [DB: offline]`)
   );
 } else {
+const URI = process.env.MONGODB_URI;
+
+// Connect MongoDB once
+if (URI && !URI.includes('<username>')) {
   mongoose.connect(URI)
-    .then(() => {
-      console.log('✅  MongoDB connected');
-      app.listen(PORT, () =>
-        console.log(`🚀  CENPEEP running at http://localhost:${PORT}  [DB: online]`)
-      );
-    })
-    .catch(err => {
-      console.error('❌  MongoDB connection failed:', err.message);
-      app.listen(PORT, () =>
-        console.log(`🚀  CENPEEP running at http://localhost:${PORT}  [DB: failed — ${err.message}]`)
-      );
-    });
+    .then(() => console.log('✅ MongoDB connected'))
+    .catch(err => console.error('❌ MongoDB connection failed:', err.message));
+} else {
+  console.warn('⚠️ MONGODB_URI not set');
+}
+
+// Local development only
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+
+  app.listen(PORT, () => {
+    console.log(`🚀 CENPEEP running at http://localhost:${PORT}`);
+  });
+}
+
+// Export for Vercel
+module.exports = app;
 }
