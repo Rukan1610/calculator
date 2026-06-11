@@ -1,20 +1,12 @@
 const express = require('express');
-const router  = express.Router();
-const multer  = require('multer');
-const XLSX    = require('xlsx');
-const path    = require('path');
-const fs      = require('fs');
+const router = express.Router();
+const multer = require('multer');
+const XLSX = require('xlsx');
+const path = require('path');
 
-// Store uploads in /uploads (temp)
-const uploadDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename:    (req, file, cb) => cb(null, `${Date.now()}_${file.originalname}`)
-});
+// Use memory storage for Vercel/serverless
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
     if (['.xlsx', '.xls'].includes(ext)) cb(null, true);
@@ -34,51 +26,62 @@ const SYM_MAP = {
   Tref: 'Tref',
   // Design — proximate
   Md: 'Md', Ad: 'Ad', VMd: 'VMd', FCd: 'FCd',
-  // Design — ultimate (second Md/Ad map to Md2/Ad2)
+  // Design — ultimate
   Cd: 'Cd', Sd: 'Sd', Hd: 'Hd', Nd: 'Nd', Od: 'Od',
   Gcvd: 'GCVd', GCVd: 'GCVd',
   Trad: 'Trad', Mwvd: 'Mwvd'
 };
 
-// Parse the CENPEEP Excel and extract all Input-row values
-function parseSheet(filePath) {
-  const wb = XLSX.readFile(filePath);
+// Parse the CENPEEP Excel buffer and extract all Input-row values
+function parseSheet(buffer) {
+  const wb = XLSX.read(buffer, { type: 'buffer' });
+
   // Try the known sheet name, fall back to first sheet
   const sheetName = wb.SheetNames.includes('CenPeep Corrected')
     ? 'CenPeep Corrected'
     : wb.SheetNames[0];
+
   const ws = wb.Sheets[sheetName];
   const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
 
-  const extracted = {};   // { fieldId: value }
-  const rawRows   = [];   // [{ particulars, uom, symbol, value }]
-  let   designMdSeen  = false;
-  let   designAdSeen  = false;
+  const extracted = {};
+  const rawRows = [];
+  let designMdSeen = false;
+  let designAdSeen = false;
 
   for (const row of rows) {
     const particulars = row[0];
-    const uom         = row[1];
-    const symbol      = row[2];
-    const formula     = row[3];
-    const value       = row[4];
+    const uom = row[1];
+    const symbol = row[2];
+    const formula = row[3];
+    const value = row[4];
 
     if (!symbol || value === null || value === undefined) continue;
 
-    // Only pull "Input" rows (skip formula rows — the front-end recalculates those)
-    const isInput = typeof formula === 'string' && formula.trim().toLowerCase() === 'input';
-    // Also pull rows with a plain numeric value in col D (design conditions have null formula)
+    // Only pull "Input" rows (skip formula rows)
+    const isInput =
+      typeof formula === 'string' && formula.trim().toLowerCase() === 'input';
+
+    // Also pull rows with a plain numeric value in col D
     const isPlainValue = (formula === null || formula === undefined) && typeof value === 'number';
 
     if (!isInput && !isPlainValue) continue;
 
     const sym = String(symbol).trim();
-    let   fieldId = SYM_MAP[sym] || SYM_MAP[sym.toLowerCase()];
+    let fieldId = SYM_MAP[sym] || SYM_MAP[sym.toLowerCase()];
 
-    // Handle duplicate Md / Ad symbols (design section re-uses same symbol names)
+    // Handle duplicate Md / Ad symbols
     if (sym === 'Md' && designMdSeen) fieldId = 'Md2';
-    if (sym === 'Md' && !designMdSeen) { fieldId = 'Md'; designMdSeen = true; }
+    if (sym === 'Md' && !designMdSeen) {
+      fieldId = 'Md';
+      designMdSeen = true;
+    }
+
     if (sym === 'Ad' && designAdSeen) fieldId = 'Ad2';
-    if (sym === 'Ad' && !designAdSeen) { fieldId = 'Ad'; designAdSeen = true; }
+    if (sym === 'Ad' && !designAdSeen) {
+      fieldId = 'Ad';
+      designAdSeen = true;
+    }
 
     if (!fieldId) continue;
 
@@ -100,23 +103,21 @@ function parseSheet(filePath) {
 // POST /api/upload
 router.post('/', upload.single('file'), (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ ok: false, error: 'No file uploaded' });
+    if (!req.file) {
+      return res.status(400).json({ ok: false, error: 'No file uploaded' });
+    }
 
-    const { extracted, rawRows, sheetName } = parseSheet(req.file.path);
-
-    // Clean up temp file
-    fs.unlink(req.file.path, () => {});
+    const { extracted, rawRows, sheetName } = parseSheet(req.file.buffer);
 
     res.json({
-      ok:           true,
-      filename:     req.file.originalname,
+      ok: true,
+      filename: req.file.originalname,
       sheetName,
-      extracted,          // { fieldId: value } — used by front-end to populate inputs
-      rawRows,            // human-readable table for confirmation
-      totalFields:  Object.keys(extracted).length
+      extracted,
+      rawRows,
+      totalFields: Object.keys(extracted).length
     });
   } catch (err) {
-    if (req.file) fs.unlink(req.file.path, () => {});
     res.status(500).json({ ok: false, error: err.message });
   }
 });
